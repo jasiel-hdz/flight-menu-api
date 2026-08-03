@@ -19,6 +19,12 @@ class Settings(BaseSettings):
     db_max_overflow: int = 10
     db_pool_timeout: float = 30.0
 
+    jwt_secret: str = "change-me-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 60
+    auth_username: str = "admin"
+    auth_password: str = "admin"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

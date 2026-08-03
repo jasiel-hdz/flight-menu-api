@@ -18,11 +18,14 @@ dependencies.py     # Shared DI (db, settings)
 core/
   schemas/          # Shared DTOs (pagination)
   health/           # Healthcheck
+  auth/             # JWT login (security helpers + service + routes)
   flights/          # Flight validation
   menus/            # Menus + dishes (routes → services → repositories)
 ```
 
 Each domain module follows: `routes.py` → `services.py` → `repositories.py` → `models.py`, with request/response schemas in `schemas.py`.
+
+JWT helpers live in `core/auth/security.py` (no FastAPI/DB). `dependencies.get_current_user` protects menus and flights.
 
 ## Quick start (local / dev)
 
@@ -74,6 +77,26 @@ Health check:
 ```bash
 curl http://127.0.0.1:8000/api/v1/health
 ```
+
+### Auth (JWT)
+
+Default mock user comes from `.env` (`AUTH_USERNAME` / `AUTH_PASSWORD`).
+
+```bash
+# 1) Get a token
+curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin"}'
+
+# 2) Call a protected endpoint
+curl -s http://127.0.0.1:8000/api/v1/menus \
+  -H "Authorization: Bearer <access_token>"
+```
+
+In Swagger (`/docs`), use **Authorize** → Bearer token.
+
+Public: `/health`, `/auth/login`, OpenAPI docs.  
+Protected: `/menus/*`, `/flights/validate`.
 
 ---
 
@@ -141,13 +164,14 @@ docker compose -f docker-compose.prod.yml down -v
 
 ## Endpoints (`/api/v1`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/health` | Healthcheck |
-| GET | `/menus` | List menus (paginated) |
-| POST | `/menus` | Create menu |
-| GET | `/menus/{id}` | Menu detail with dishes |
-| PUT | `/menus/{id}` | Update menu |
-| DELETE | `/menus/{id}` | Soft delete |
-| POST | `/menus/search` | Filtered search |
-| POST | `/flights/validate` | Validate flight number + route |
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/health` | No | Healthcheck |
+| POST | `/auth/login` | No | Issue JWT access token |
+| GET | `/menus` | Bearer | List menus (paginated) |
+| POST | `/menus` | Bearer | Create menu |
+| GET | `/menus/{id}` | Bearer | Menu detail with dishes |
+| PUT | `/menus/{id}` | Bearer | Update menu |
+| DELETE | `/menus/{id}` | Bearer | Soft delete |
+| POST | `/menus/search` | Bearer | Filtered search |
+| POST | `/flights/validate` | Bearer | Validate flight number + route |

@@ -16,7 +16,10 @@ from core.menus.schemas import (
 from core.menus.services import MenuService
 from core.schemas.pagination import Paginated
 
-router = APIRouter(tags=["menus"])
+router = APIRouter(
+    tags=["menus"],
+    dependencies=[Depends(deps.get_current_user)],
+)
 
 
 @router.get("/menus", response_model=Paginated[MenuListItem])

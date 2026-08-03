@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from config import get_settings
+from core.auth.routes import router as auth_router
 from core.flights.routes import router as flights_router
 from core.health.routes import router as health_router
 from core.menus.routes import router as menus_router
@@ -26,6 +27,7 @@ def create_app() -> FastAPI:
     prefix = settings.api_prefix
 
     app.include_router(health_router, prefix=prefix)
+    app.include_router(auth_router, prefix=prefix)
     app.include_router(flights_router, prefix=prefix)
     app.include_router(menus_router, prefix=prefix)
 

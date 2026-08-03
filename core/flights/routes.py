@@ -7,7 +7,10 @@ import dependencies as deps
 from core.flights.schemas import FlightValidateRequest, FlightValidateResponse
 from core.flights.services import FlightService
 
-router = APIRouter(tags=["flights"])
+router = APIRouter(
+    tags=["flights"],
+    dependencies=[Depends(deps.get_current_user)],
+)
 
 
 @router.post("/flights/validate", response_model=FlightValidateResponse)
