@@ -7,6 +7,7 @@ REST API for managing flight meal menus (multi-language ES/EN).
 - Python 3.11+ (Docker images use 3.12)
 - FastAPI + Pydantic v2
 - SQLAlchemy 2.0 + PostgreSQL 16
+- Alembic (schema migrations)
 
 ## Layout
 
@@ -15,6 +16,8 @@ app.py              # FastAPI factory + router wiring
 config.py           # Settings from env
 database.py         # Engine, session, Base
 dependencies.py     # Shared DI (db, settings)
+alembic/            # Migrations (env.py + versions/)
+alembic.ini
 core/
   schemas/          # Shared DTOs (pagination)
   health/           # Healthcheck
@@ -66,6 +69,8 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
+alembic upgrade head
+
 python app.py
 # or: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
@@ -77,6 +82,29 @@ Health check:
 ```bash
 curl http://127.0.0.1:8000/api/v1/health
 ```
+
+### Migrations (Alembic)
+
+Schema changes are applied with Alembic (same pattern as production `entrypoint.sh`).
+
+```bash
+# Apply all pending migrations
+alembic upgrade head
+
+# Show current revision
+alembic current
+
+# Show history
+alembic history
+
+# Create a new revision after changing SQLAlchemy models
+alembic revision --autogenerate -m "describe change"
+
+# Roll back one revision
+alembic downgrade -1
+```
+
+URL and credentials come from `.env` via `alembic/env.py` (never hardcode them in `alembic.ini`).
 
 ### 4. Seed demo flights
 
@@ -117,7 +145,7 @@ Protected: `/menus/*`, `/flights/validate`.
 
 ## Production (API + DB with Docker)
 
-`docker-compose.prod.yml` starts **both** PostgreSQL and the API. The API container waits for the DB, creates tables if needed, then serves on port `8000`.
+`docker-compose.prod.yml` starts **both** PostgreSQL and the API. The API container runs `alembic upgrade head`, then serves on port `8000`.
 
 ### 1. Env
 
@@ -173,7 +201,7 @@ docker compose -f docker-compose.prod.yml down -v
 | `docker-compose.prod.yml` | Postgres + API |
 | `Dockerfile` | Dev image (optional; API usually runs on host in dev) |
 | `Dockerfile.prod` | Production API image |
-| `entrypoint.sh` | Wait for DB → create tables → uvicorn |
+| `entrypoint.sh` | `alembic upgrade head` → uvicorn |
 
 ---
 
