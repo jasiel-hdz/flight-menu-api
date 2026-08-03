@@ -8,6 +8,8 @@ psycopg2-binary==2.9.11
 python-dotenv==1.2.2
 python-multipart==0.0.22
 PyJWT==2.10.1
+structlog==25.4.0
+openpyxl==3.1.5
 pytest==9.0.2
 httpx==0.28.1
 pytest-cov==6.2.1

@@ -10,7 +10,7 @@ if str(ROOT) not in sys.path:
 from core.flights.models import Flight
 from core.flights.repositories import FlightRepository
 from core.menus import models as _menus_models  # noqa: F401
-from database import Base, engine, session_factory
+from database import session_factory
 
 SEED_FLIGHTS = (
     {"flight_number": "AM500", "departure_airport": "MEX", "arrival_airport": "CUN", "carrier": "AM"},
@@ -21,7 +21,6 @@ SEED_FLIGHTS = (
 
 
 def main() -> None:
-    Base.metadata.create_all(bind=engine)
     created = 0
     skipped = 0
 

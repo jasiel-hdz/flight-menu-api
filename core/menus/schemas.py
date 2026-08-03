@@ -184,3 +184,16 @@ class MenuSearchRequest(BaseModel):
         ):
             raise ValueError("end_date must be on or after start_date")
         return self
+
+
+class DishBulkUploadError(BaseModel):
+    row: int
+    detail: str
+
+
+class DishBulkUploadResponse(BaseModel):
+    menu_id: uuid.UUID
+    created: int
+    failed: int
+    errors: list[DishBulkUploadError] = Field(default_factory=list)
+    dishes: list[DishRead] = Field(default_factory=list)

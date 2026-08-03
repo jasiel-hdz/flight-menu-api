@@ -4,15 +4,8 @@ from uuid import uuid4
 
 def _menu_payload(flight_id, *, start=None, dishes=None):
     start = start or date(2026, 8, 1)
-    return {
-        "flight_id": str(flight_id),
-        "start_date": start.isoformat(),
-        "end_date": (start + timedelta(days=7)).isoformat(),
-        "cycle": "C1",
-        "status": "active",
-        "created_by": "tester",
-        "dishes": dishes
-        or [
+    if dishes is None:
+        dishes = [
             {
                 "meal_code": "BF1",
                 "name_es": "Huevos",
@@ -21,7 +14,15 @@ def _menu_payload(flight_id, *, start=None, dishes=None):
                 "description_en": "With beans",
                 "availability": "available",
             }
-        ],
+        ]
+    return {
+        "flight_id": str(flight_id),
+        "start_date": start.isoformat(),
+        "end_date": (start + timedelta(days=7)).isoformat(),
+        "cycle": "C1",
+        "status": "active",
+        "created_by": "tester",
+        "dishes": dishes,
     }
 
 

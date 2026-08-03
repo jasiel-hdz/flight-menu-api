@@ -2,11 +2,21 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query, Response, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Query,
+    Response,
+    UploadFile,
+    status,
+)
 from sqlalchemy.orm import Session
 
 import dependencies as deps
 from core.menus.schemas import (
+    DishBulkUploadResponse,
     MenuCreate,
     MenuListItem,
     MenuRead,
@@ -52,6 +62,30 @@ def search_menus(
     db: Session = Depends(deps.get_db),
 ) -> Paginated[MenuListItem]:
     return MenuService(db).search(body)
+
+
+@router.post(
+    "/menus/{menu_id}/dishes/upload",
+    response_model=DishBulkUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_menu_dishes(
+    menu_id: uuid.UUID,
+    file: UploadFile = File(...),
+    db: Session = Depends(deps.get_db),
+) -> DishBulkUploadResponse:
+    content = await file.read()
+    if not content:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Empty file")
+
+    filename = file.filename or "upload.csv"
+    result = MenuService(db).bulk_upload_dishes(
+        menu_id,
+        content=content,
+        filename=filename,
+    )
+    db.commit()
+    return result
 
 
 @router.get("/menus/{menu_id}", response_model=MenuRead)

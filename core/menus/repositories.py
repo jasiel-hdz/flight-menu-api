@@ -109,3 +109,6 @@ class MenuRepository:
     def replace_dishes(self, menu: Menu, dishes: list[Dish]) -> None:
         menu.dishes.clear()
         menu.dishes.extend(dishes)
+
+    def add_dishes(self, menu: Menu, dishes: list[Dish]) -> None:
+        menu.dishes.extend(dishes)

@@ -8,6 +8,7 @@ REST API for managing flight meal menus (multi-language ES/EN).
 - FastAPI + Pydantic v2
 - SQLAlchemy 2.0 + PostgreSQL 16
 - Alembic (schema migrations)
+- structlog (JSON logs for CloudWatch)
 
 ## Layout
 
@@ -24,6 +25,8 @@ core/
   auth/             # JWT login (security helpers + service + routes)
   flights/          # Flight validation
   menus/            # Menus + dishes (routes → services → repositories)
+  middleware/       # Request logging
+  logging_config.py # structlog setup
 ```
 
 Each domain module follows: `routes.py` → `services.py` → `repositories.py` → `models.py`, with **separate** Pydantic v2 request/response schemas in `schemas.py` (`*Create`/`*Update`/`*SearchRequest` vs `*Read`/`*Response`).
@@ -48,10 +51,11 @@ cp .env.example .env
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-Check it is healthy:
+Wait until Postgres is healthy (first boot after a fresh volume can take a few seconds):
 
 ```bash
 docker compose -f docker-compose.dev.yml ps
+# STATUS should show "healthy" before running migrations
 ```
 
 Stop / remove:
@@ -141,6 +145,12 @@ In Swagger (`/docs`), use **Authorize** → Bearer token.
 Public: `/health`, `/auth/login`, OpenAPI docs.  
 Protected: `/menus/*`, `/flights/validate`.
 
+### Logging
+
+Logs go to stdout via **structlog**. Set `LOG_JSON=true` for JSON lines (CloudWatch / ECS). Locally keep `LOG_JSON=false` for readable console output. `LOG_LEVEL` defaults to `INFO`.
+
+Each request (except `/health`) gets an `X-Request-ID` (incoming header is reused when present).
+
 ---
 
 ## Production (API + DB with Docker)
@@ -229,4 +239,21 @@ Uses an in-memory SQLite database (`APP_ENV=test`). Coverage gate is **> 60%** (
 | PUT | `/menus/{id}` | Bearer | Update menu |
 | DELETE | `/menus/{id}` | Bearer | Soft delete |
 | POST | `/menus/search` | Bearer | Filtered search |
+| POST | `/menus/{id}/dishes/upload` | Bearer | Bulk load dishes from CSV/Excel |
 | POST | `/flights/validate` | Bearer | Validate flight number + route |
+
+### Bulk dish upload
+
+`POST /api/v1/menus/{menu_id}/dishes/upload` accepts multipart `file` (`.csv` or `.xlsx`).
+
+Sample file: [`samples/dishes_sample.csv`](samples/dishes_sample.csv)
+
+Required columns: `meal_code`, `name_es`, `name_en`  
+Optional: `description_es`, `description_en`, `image_url`, `availability`
+
+```bash
+curl -s -X POST "http://127.0.0.1:8000/api/v1/menus/<menu_id>/dishes/upload" \
+  -H "Authorization: Bearer <access_token>" \
+  -F "file=@samples/dishes_sample.csv"
+```
+

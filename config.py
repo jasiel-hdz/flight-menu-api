@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     auth_username: str = "admin"
     auth_password: str = "admin"
 
+    log_level: str = "INFO"
+    # JSON for CloudWatch; console-friendly output when false (local dev)
+    log_json: bool = False
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
