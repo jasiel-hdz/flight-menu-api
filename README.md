@@ -44,14 +44,14 @@ Fue desarrollada como prueba técnica de **Desarrollador Backend** (FastAPI + Po
 ## Cómo funciona
 
 ```mermaid
-flowchart LR
-  client[Cliente_o_Swagger] --> api[FastAPI]
-  api --> auth[JWT_Auth]
-  api --> menus[MenuService]
-  api --> flights[FlightService]
-  menus --> repo[Repositories]
+graph LR
+  client["Cliente / Swagger"] --> api["FastAPI"]
+  api --> auth["JWT Auth"]
+  api --> menus["MenuService"]
+  api --> flights["FlightService"]
+  menus --> repo["Repositories"]
   flights --> repo
-  repo --> db[(PostgreSQL)]
+  repo --> db["PostgreSQL"]
 ```
 
 Flujo típico de uso:
