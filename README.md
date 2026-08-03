@@ -78,6 +78,21 @@ Health check:
 curl http://127.0.0.1:8000/api/v1/health
 ```
 
+### 4. Seed demo flights
+
+Idempotent sample flights for `/flights/validate` and menu creation demos:
+
+```bash
+python scripts/seed_flights.py
+```
+
+| flight_number | route | carrier |
+|---------------|-------|---------|
+| AM500 | MEX → CUN | AM |
+| AM412 | MEX → GDL | AM |
+| VB3207 | MTY → CUN | VB |
+| Y4550 | MEX → TIJ | Y4 |
+
 ### Auth (JWT)
 
 Default mock user comes from `.env` (`AUTH_USERNAME` / `AUTH_PASSWORD`).
