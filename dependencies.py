@@ -15,11 +15,13 @@ http_bearer = HTTPBearer(auto_error=False)
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    from database import Base, engine
-    from core.flights import models as _flights_models  # noqa: F401
-    from core.menus import models as _menus_models  # noqa: F401
+    settings = get_settings()
+    if settings.app_env != "test":
+        from database import Base, engine
+        from core.flights import models as _flights_models  # noqa: F401
+        from core.menus import models as _menus_models  # noqa: F401
 
-    Base.metadata.create_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
     yield
 
 

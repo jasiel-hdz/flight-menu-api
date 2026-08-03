@@ -3,8 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, ForeignKey, String, UniqueConstraint, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Date, DateTime, ForeignKey, String, UniqueConstraint, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
@@ -14,10 +13,10 @@ class Menu(Base):
     __tablename__ = "menus"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        Uuid, primary_key=True, default=uuid.uuid4
     )
     flight_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("flights.id"), nullable=False, index=True
+        Uuid, ForeignKey("flights.id"), nullable=False, index=True
     )
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
@@ -42,10 +41,10 @@ class Dish(Base):
     __tablename__ = "dishes"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        Uuid, primary_key=True, default=uuid.uuid4
     )
     menu_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("menus.id"), nullable=False, index=True
+        Uuid, ForeignKey("menus.id"), nullable=False, index=True
     )
     meal_code: Mapped[str] = mapped_column(String(30), nullable=False)
     name_es: Mapped[str] = mapped_column(String(255), nullable=False)

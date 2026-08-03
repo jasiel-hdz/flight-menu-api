@@ -23,7 +23,7 @@ core/
   menus/            # Menus + dishes (routes → services → repositories)
 ```
 
-Each domain module follows: `routes.py` → `services.py` → `repositories.py` → `models.py`, with request/response schemas in `schemas.py`.
+Each domain module follows: `routes.py` → `services.py` → `repositories.py` → `models.py`, with **separate** Pydantic v2 request/response schemas in `schemas.py` (`*Create`/`*Update`/`*SearchRequest` vs `*Read`/`*Response`).
 
 JWT helpers live in `core/auth/security.py` (no FastAPI/DB). `dependencies.get_current_user` protects menus and flights.
 
@@ -159,6 +159,18 @@ docker compose -f docker-compose.prod.yml down -v
 | `Dockerfile` | Dev image (optional; API usually runs on host in dev) |
 | `Dockerfile.prod` | Production API image |
 | `entrypoint.sh` | Wait for DB → create tables → uvicorn |
+
+---
+
+## Tests
+
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
+pytest
+```
+
+Uses an in-memory SQLite database (`APP_ENV=test`). Coverage gate is **> 60%** (`pytest.ini`).
 
 ---
 
